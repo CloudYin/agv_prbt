@@ -1,0 +1,64 @@
+<?xml version="1.0" ?>
+
+<robot name="prbt" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- macro definition of pilz lwa -->
+  <xacro:include filename="$(find prbt_support)/urdf/prbt_macro.xacro" />
+
+  <!-- coloring from the table -->
+  <material name="grey">
+    <color rgba="0.75 0.75 0.75 1"/>
+  </material>
+
+  <!-- instantiate the robot -->
+  <xacro:prbt prefix="prbt_"/>
+
+  <link name="agv">
+    <visual>
+      <origin rpy="1.57 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://agv_prbt_2022/urdf/meshes/agv.stl"
+            scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <origin rpy="1.57 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://agv_prbt_2022/urdf/meshes/agv.stl"
+            scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="prbt_tcp"/>
+
+  <link name="world"/>
+
+  <joint name="agv_world" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="world"/>
+    <child link="agv"/>
+  </joint>
+
+  <joint name="agv_joint" type="fixed">
+    <origin rpy="0 0 -1.57" xyz="0.79 -0.35 0.672"/>
+    <parent link="agv"/>
+    <child link="prbt_base_link"/>
+  </joint>
+
+  <!-- connect the added tcp and the flange with a joint -->
+  <joint name="prbt_fixed_joint_tcp" type="fixed">
+    <origin rpy="0 0 -0.785" xyz="0 0 0.05"/>
+    <parent link="prbt_flange"/>
+    <child link="prbt_tcp"/>
+  </joint>
+
+  <!-- add PG70 gripper with cuboid brackets of configurable size -->
+  <xacro:include filename="$(find prbt_pg70_support)/urdf/pg70.urdf.xacro" />
+  <xacro:prbt_gripper gripper_name="prbt_gripper" parent="prbt_flange" />
+  <xacro:include filename="$(find prbt_support)/urdf/simple_gripper_brackets.urdf.xacro" />
+  <xacro:simple_gripper_brackets gripper_name="prbt_gripper" size_y="0.003" />
+ 
+
+</robot>

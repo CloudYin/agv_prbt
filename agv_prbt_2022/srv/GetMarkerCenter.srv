@@ -1,0 +1,7 @@
+
+---
+float64 feedTable_x
+float64 feedTable_y
+float64 smfTable_x
+float64 smfTable_y
+float64 angle
