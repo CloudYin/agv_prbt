@@ -34,13 +34,13 @@ AGV_PLATE_FULL_POSE = Pose(
     position=Point(-0.128, -0.357, 0.138), orientation=GRIPPER_ORIENTATION_AGV
 )  # AGV满料盘位置
 AGV_PLATE_EMPTY_POSE = Pose(
-    position=Point(0.117, -0.3605, 0.138), orientation=GRIPPER_ORIENTATION_AGV
+    position=Point(0.116, -0.3605, 0.138), orientation=GRIPPER_ORIENTATION_AGV
 )  # AGV空料盘位置
 SAFETY_HEIGHT = 0.32
 FEED_TABLE_BOX_FULL_OFFSET_X = 0.102
-FEED_TABLE_BOX_EMPTY_OFFSET_X = 0.102 + 0.215
-FEED_TABLE_PEN_FULL_OFFSET_X = 0.102 - 0.429
-FEED_TABLE_PEN_EMPTY_OFFSET_X = 0.102 - 0.214
+FEED_TABLE_BOX_EMPTY_OFFSET_X = 0.102 + 0.2135
+FEED_TABLE_PEN_FULL_OFFSET_X = 0.102 - 0.214 * 2
+FEED_TABLE_PEN_EMPTY_OFFSET_X = 0.102 - 0.2135
 FEED_TABLE_OFFSET_Y = 0.121
 FEED_TABLE_PNP_OFFSET_Z = 0.073
 SMF_TABLE_BOX_OFFSET_X = 0.264
@@ -409,99 +409,101 @@ if __name__ == "__main__":
                 # AGV去上料台位置
                 agv_task_id_deploy = agv_task_deply_wrapper(agv_task_id_deploy, 1)
 
-            if 0 <= box_plate_place_number < 5:
-                r.move(Ptp(goal=CAPTURE_POSE, vel_scale=PTP_SCALE, acc_scale=0.2))
-                rospy.sleep(0.5)
-                get_marker_center()
-                r.move(
-                    Ptp(
-                        goal=Pose(orientation=from_euler(0, 0, math.radians(angle))),
-                        reference_frame="prbt_tcp",
-                        vel_scale=PTP_SCALE,
-                        acc_scale=0.1,
+                if 0 <= box_plate_place_number < 5:
+                    r.move(Ptp(goal=CAPTURE_POSE, vel_scale=PTP_SCALE, acc_scale=0.2))
+                    rospy.sleep(0.5)
+                    get_marker_center()
+                    r.move(
+                        Ptp(
+                            goal=Pose(
+                                orientation=from_euler(0, 0, math.radians(angle))
+                            ),
+                            reference_frame="prbt_tcp",
+                            vel_scale=PTP_SCALE,
+                            acc_scale=0.1,
+                        )
                     )
-                )
-                rospy.sleep(0.5)
-                get_marker_center()
-                place_middle_waypoint = r.get_current_pose()
-                r.move(
-                    Ptp(
-                        goal=AGV_PLATE_EMPTY_POSE,
-                        reference_frame="prbt_base_link",
-                        vel_scale=PTP_SCALE,
-                        acc_scale=0.2,
+                    rospy.sleep(0.5)
+                    get_marker_center()
+                    place_middle_waypoint = r.get_current_pose()
+                    r.move(
+                        Ptp(
+                            goal=AGV_PLATE_EMPTY_POSE,
+                            reference_frame="prbt_base_link",
+                            vel_scale=PTP_SCALE,
+                            acc_scale=0.2,
+                        )
                     )
-                )
-                r.move(Gripper(goal=0.029))
-                r.move(
-                    Lin(
-                        goal=Pose(position=Point(0, 0, 0.048)),
-                        reference_frame="prbt_tcp",
-                        vel_scale=PNP_SCALE,
-                        acc_scale=0.1,
+                    r.move(Gripper(goal=0.029))
+                    r.move(
+                        Lin(
+                            goal=Pose(position=Point(0, 0, 0.048)),
+                            reference_frame="prbt_tcp",
+                            vel_scale=PNP_SCALE,
+                            acc_scale=0.1,
+                        )
                     )
-                )
-                r.move(Gripper(goal=0.022))
-                rospy.sleep(0.5)
-                r.move(
-                    Lin(
-                        goal=AGV_PLATE_EMPTY_POSE,
-                        reference_frame="prbt_base_link",
-                        vel_scale=PNP_SCALE,
-                        acc_scale=0.1,
+                    r.move(Gripper(goal=0.022))
+                    rospy.sleep(0.5)
+                    r.move(
+                        Lin(
+                            goal=AGV_PLATE_EMPTY_POSE,
+                            reference_frame="prbt_base_link",
+                            vel_scale=PNP_SCALE,
+                            acc_scale=0.1,
+                        )
                     )
-                )
-                r.move(
-                    Ptp(
-                        goal=place_middle_waypoint,
-                        reference_frame="prbt_base_link",
-                        vel_scale=PTP_SCALE,
-                        acc_scale=0.1,
+                    r.move(
+                        Ptp(
+                            goal=place_middle_waypoint,
+                            reference_frame="prbt_base_link",
+                            vel_scale=PTP_SCALE,
+                            acc_scale=0.1,
+                        )
                     )
-                )
-                r.move(
-                    Lin(
-                        goal=Pose(
-                            position=Point(
-                                -feedTable_x - FEED_TABLE_BOX_EMPTY_OFFSET_X,
-                                feedTable_y
-                                + FEED_TABLE_OFFSET_Y
-                                + CAMERA_GRIPPER_OFFSET
-                                + 0.002,
-                                0.3,
-                            )
-                        ),
-                        reference_frame="prbt_tcp",
-                        vel_scale=LIN_SCALE,
-                        acc_scale=0.1,
+                    r.move(
+                        Lin(
+                            goal=Pose(
+                                position=Point(
+                                    -feedTable_x - FEED_TABLE_BOX_EMPTY_OFFSET_X,
+                                    feedTable_y
+                                    + FEED_TABLE_OFFSET_Y
+                                    + CAMERA_GRIPPER_OFFSET
+                                    + 0.002,
+                                    0.3,
+                                )
+                            ),
+                            reference_frame="prbt_tcp",
+                            vel_scale=LIN_SCALE,
+                            acc_scale=0.1,
+                        )
                     )
-                )
-                place_start_pose = r.get_current_pose()
-                place_height = (
-                    FEED_TABLE_PNP_OFFSET_Z
-                    + (5 - box_plate_place_number) * 0.025
-                    - 0.023
-                )
-                r.move(
-                    Lin(
-                        goal=Pose(position=Point(0, 0, place_height)),
-                        reference_frame="prbt_tcp",
-                        vel_scale=PNP_SCALE,
-                        acc_scale=0.1,
+                    place_start_pose = r.get_current_pose()
+                    place_height = (
+                        FEED_TABLE_PNP_OFFSET_Z
+                        + (5 - box_plate_place_number) * 0.025
+                        - 0.023
                     )
-                )
-                r.move(Gripper(goal=0.029))
-                rospy.sleep(0.5)
-                r.move(
-                    Lin(
-                        goal=place_start_pose,
-                        reference_frame="prbt_base_link",
-                        vel_scale=PNP_SCALE,
-                        acc_scale=0.1,
+                    r.move(
+                        Lin(
+                            goal=Pose(position=Point(0, 0, place_height)),
+                            reference_frame="prbt_tcp",
+                            vel_scale=PNP_SCALE,
+                            acc_scale=0.1,
+                        )
                     )
-                )
-                r.move(Lin(goal=CAPTURE_POSE, vel_scale=LIN_SCALE, acc_scale=0.1))
-                r.move(Ptp(goal=HOME_POSE, vel_scale=PTP_SCALE, acc_scale=0.2))
+                    r.move(Gripper(goal=0.029))
+                    rospy.sleep(0.5)
+                    r.move(
+                        Lin(
+                            goal=place_start_pose,
+                            reference_frame="prbt_base_link",
+                            vel_scale=PNP_SCALE,
+                            acc_scale=0.1,
+                        )
+                    )
+                    r.move(Lin(goal=CAPTURE_POSE, vel_scale=LIN_SCALE, acc_scale=0.1))
+                    r.move(Ptp(goal=HOME_POSE, vel_scale=PTP_SCALE, acc_scale=0.2))
 
         if pen_missing:
             if 0 < pen_plate_pick_number <= 5:
@@ -527,7 +529,8 @@ if __name__ == "__main__":
                                 -feedTable_x - FEED_TABLE_PEN_FULL_OFFSET_X,
                                 feedTable_y
                                 + FEED_TABLE_OFFSET_Y
-                                + CAMERA_GRIPPER_OFFSET,
+                                + CAMERA_GRIPPER_OFFSET
+                                - 0.003,
                                 0.3,
                             ),
                         ),
@@ -551,7 +554,7 @@ if __name__ == "__main__":
                         acc_scale=0.1,
                     )
                 )
-                r.move(Gripper(goal=0.029))
+                r.move(Gripper(goal=0.022))
                 rospy.sleep(0.5)
                 r.move(
                     Lin(
@@ -570,14 +573,6 @@ if __name__ == "__main__":
                         goal=AGV_PLATE_FULL_POSE,
                         reference_frame="prbt_base_link",
                         vel_scale=LIN_SCALE,
-                        acc_scale=0.1,
-                    )
-                )
-                r.move(
-                    Ptp(
-                        goal=Pose(orientation=from_euler(0, 0, math.radians(1))),
-                        reference_frame="prbt_tcp",
-                        vel_scale=PTP_SCALE,
                         acc_scale=0.1,
                     )
                 )
@@ -626,7 +621,7 @@ if __name__ == "__main__":
                             position=Point(
                                 -smfTable_x - SMF_TABLE_PEN_OFFSET_X,
                                 smfTable_y + SMF_TABLE_OFFSET_Y + CAMERA_GRIPPER_OFFSET,
-                                0.278,
+                                0.28,
                             )
                         ),
                         reference_frame="prbt_tcp",
@@ -635,7 +630,7 @@ if __name__ == "__main__":
                     )
                 )
                 pick_start_pose = r.get_current_pose()
-                pick_height = 0.046
+                pick_height = 0.041
                 r.move(Gripper(goal=0.029))
                 r.move(
                     Lin(
@@ -645,7 +640,7 @@ if __name__ == "__main__":
                         acc_scale=0.1,
                     )
                 )
-                r.move(Gripper(goal=0.029))
+                r.move(Gripper(goal=0.022))
                 rospy.sleep(0.5)
                 r.move(
                     Lin(
@@ -664,14 +659,6 @@ if __name__ == "__main__":
                         reference_frame="prbt_base_link",
                         vel_scale=PTP_SCALE,
                         acc_scale=0.2,
-                    )
-                )
-                r.move(
-                    Ptp(
-                        goal=Pose(orientation=from_euler(0, 0, math.radians(1))),
-                        reference_frame="prbt_tcp",
-                        vel_scale=PTP_SCALE,
-                        acc_scale=0.1,
                     )
                 )
                 r.move(
@@ -702,24 +689,16 @@ if __name__ == "__main__":
                         acc_scale=0.1,
                     )
                 )
-                r.move(
-                    Ptp(
-                        goal=Pose(orientation=from_euler(0, 0, math.radians(1))),
-                        reference_frame="prbt_tcp",
-                        vel_scale=PTP_SCALE,
-                        acc_scale=0.1,
-                    )
-                )
                 r.move(Gripper(goal=0.029))
                 r.move(
                     Lin(
-                        goal=Pose(position=Point(0, 0, 0.05)),
+                        goal=Pose(position=Point(0, 0, 0.048)),
                         reference_frame="prbt_tcp",
                         vel_scale=PNP_SCALE,
                         acc_scale=0.1,
                     )
                 )
-                r.move(Gripper(goal=0.029))
+                r.move(Gripper(goal=0.022))
                 rospy.sleep(0.5)
                 r.move(
                     Lin(
@@ -762,106 +741,100 @@ if __name__ == "__main__":
                 # AGV去上料台位置
                 agv_task_id_deploy = agv_task_deply_wrapper(agv_task_id_deploy, 1)
 
-            if 0 <= pen_plate_place_number < 5:
-                r.move(Ptp(goal=CAPTURE_POSE, vel_scale=PTP_SCALE, acc_scale=0.2))
-                rospy.sleep(0.5)
-                get_marker_center()
-                r.move(
-                    Ptp(
-                        goal=Pose(orientation=from_euler(0, 0, math.radians(angle))),
-                        reference_frame="prbt_tcp",
-                        vel_scale=PTP_SCALE,
-                        acc_scale=0.1,
+                if 0 <= pen_plate_place_number < 5:
+                    r.move(Ptp(goal=CAPTURE_POSE, vel_scale=PTP_SCALE, acc_scale=0.2))
+                    rospy.sleep(0.5)
+                    get_marker_center()
+                    r.move(
+                        Ptp(
+                            goal=Pose(
+                                orientation=from_euler(0, 0, math.radians(angle))
+                            ),
+                            reference_frame="prbt_tcp",
+                            vel_scale=PTP_SCALE,
+                            acc_scale=0.1,
+                        )
                     )
-                )
-                rospy.sleep(0.5)
-                get_marker_center()
-                place_middle_waypoint = r.get_current_pose()
-                r.move(
-                    Ptp(
-                        goal=AGV_PLATE_EMPTY_POSE,
-                        reference_frame="prbt_base_link",
-                        vel_scale=PTP_SCALE,
-                        acc_scale=0.2,
+                    rospy.sleep(0.5)
+                    get_marker_center()
+                    place_middle_waypoint = r.get_current_pose()
+                    r.move(
+                        Ptp(
+                            goal=AGV_PLATE_EMPTY_POSE,
+                            reference_frame="prbt_base_link",
+                            vel_scale=PTP_SCALE,
+                            acc_scale=0.2,
+                        )
                     )
-                )
-                r.move(
-                    Ptp(
-                        goal=Pose(orientation=from_euler(0, 0, math.radians(1))),
-                        reference_frame="prbt_tcp",
-                        vel_scale=PTP_SCALE,
-                        acc_scale=0.1,
+                    r.move(Gripper(goal=0.029))
+                    r.move(
+                        Lin(
+                            goal=Pose(position=Point(0, 0, 0.048)),
+                            reference_frame="prbt_tcp",
+                            vel_scale=PNP_SCALE,
+                            acc_scale=0.1,
+                        )
                     )
-                )
-                r.move(Gripper(goal=0.029))
-                r.move(
-                    Lin(
-                        goal=Pose(position=Point(0, 0, 0.05)),
-                        reference_frame="prbt_tcp",
-                        vel_scale=PNP_SCALE,
-                        acc_scale=0.1,
+                    r.move(Gripper(goal=0.022))
+                    rospy.sleep(0.5)
+                    r.move(
+                        Lin(
+                            goal=AGV_PLATE_EMPTY_POSE,
+                            reference_frame="prbt_base_link",
+                            vel_scale=PNP_SCALE,
+                            acc_scale=0.1,
+                        )
                     )
-                )
-                r.move(Gripper(goal=0.029))
-                rospy.sleep(0.5)
-                r.move(
-                    Lin(
-                        goal=AGV_PLATE_EMPTY_POSE,
-                        reference_frame="prbt_base_link",
-                        vel_scale=PNP_SCALE,
-                        acc_scale=0.1,
+                    r.move(
+                        Ptp(
+                            goal=place_middle_waypoint,
+                            reference_frame="prbt_base_link",
+                            vel_scale=PTP_SCALE,
+                            acc_scale=0.1,
+                        )
                     )
-                )
-                r.move(
-                    Ptp(
-                        goal=place_middle_waypoint,
-                        reference_frame="prbt_base_link",
-                        vel_scale=PTP_SCALE,
-                        acc_scale=0.1,
+                    r.move(
+                        Lin(
+                            goal=Pose(
+                                position=Point(
+                                    -feedTable_x - FEED_TABLE_PEN_EMPTY_OFFSET_X,
+                                    feedTable_y
+                                    + FEED_TABLE_OFFSET_Y
+                                    + CAMERA_GRIPPER_OFFSET
+                                    - 0.002,
+                                    0.3,
+                                )
+                            ),
+                            reference_frame="prbt_tcp",
+                            vel_scale=LIN_SCALE,
+                            acc_scale=0.1,
+                        )
                     )
-                )
-                r.move(
-                    Lin(
-                        goal=Pose(
-                            position=Point(
-                                -feedTable_x - FEED_TABLE_PEN_EMPTY_OFFSET_X,
-                                feedTable_y
-                                + FEED_TABLE_OFFSET_Y
-                                + CAMERA_GRIPPER_OFFSET
-                                + 0.004,
-                                0.3,
-                            )
-                        ),
-                        reference_frame="prbt_tcp",
-                        vel_scale=LIN_SCALE,
-                        acc_scale=0.1,
+                    place_start_pose = r.get_current_pose()
+                    place_height = (
+                        FEED_TABLE_PNP_OFFSET_Z
+                        + (5 - pen_plate_place_number) * 0.025
+                        - 0.023
                     )
-                )
-                place_start_pose = r.get_current_pose()
-                place_height = (
-                    FEED_TABLE_PNP_OFFSET_Z
-                    + (5 - pen_plate_place_number) * 0.025
-                    - 0.023
-                )
-                r.move(
-                    Lin(
-                        goal=Pose(position=Point(0, 0, place_height)),
-                        reference_frame="prbt_tcp",
-                        vel_scale=PNP_SCALE,
-                        acc_scale=0.1,
+                    r.move(
+                        Lin(
+                            goal=Pose(position=Point(0, 0, place_height)),
+                            reference_frame="prbt_tcp",
+                            vel_scale=PNP_SCALE,
+                            acc_scale=0.1,
+                        )
                     )
-                )
-                r.move(Gripper(goal=0.029))
-                rospy.sleep(0.5)
-                r.move(
-                    Lin(
-                        goal=place_start_pose,
-                        reference_frame="prbt_base_link",
-                        vel_scale=PNP_SCALE,
-                        acc_scale=0.1,
+                    r.move(Gripper(goal=0.029))
+                    rospy.sleep(0.5)
+                    r.move(
+                        Lin(
+                            goal=place_start_pose,
+                            reference_frame="prbt_base_link",
+                            vel_scale=PNP_SCALE,
+                            acc_scale=0.1,
+                        )
                     )
-                )
-                r.move(Lin(goal=CAPTURE_POSE, vel_scale=LIN_SCALE, acc_scale=0.1))
-                r.move(Ptp(goal=HOME_POSE, vel_scale=PTP_SCALE, acc_scale=0.2))
+                    r.move(Lin(goal=CAPTURE_POSE, vel_scale=LIN_SCALE, acc_scale=0.1))
+                    r.move(Ptp(goal=HOME_POSE, vel_scale=PTP_SCALE, acc_scale=0.2))
 
     rospy.spin()
