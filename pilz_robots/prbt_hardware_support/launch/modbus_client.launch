@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   <!-- the register range for reading is determined automatically from the api spec,
        however this can be overruled by specifying the following arguments -->
   <arg name="index_of_first_register_to_read" default="970" />
-  <arg name="num_registers_to_read" default="20" />
+  <arg name="num_registers_to_read" default="30" />
 
   <!-- define the connected safety hardware -->
   <arg name="safety_hw" default="pss4000" />

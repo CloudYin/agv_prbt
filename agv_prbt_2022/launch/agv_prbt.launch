@@ -87,6 +87,5 @@ limitations under the License.
     </group>
 
     <!-- startup application script with state-machine-based or similar procedural control -->
-    <!-- <node name="agv_prbt_application_node" pkg="agv_prbt" type="agv_prbt_application.py" />  -->
 
 </launch>
