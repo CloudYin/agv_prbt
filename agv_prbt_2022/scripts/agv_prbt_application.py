@@ -34,7 +34,7 @@ AGV_PLATE_FULL_POSE = Pose(
     position=Point(-0.128, -0.357, 0.138), orientation=GRIPPER_ORIENTATION_AGV
 )  # AGV满料盘位置
 AGV_PLATE_EMPTY_POSE = Pose(
-    position=Point(0.116, -0.3605, 0.138), orientation=GRIPPER_ORIENTATION_AGV
+    position=Point(0.116, -0.361, 0.138), orientation=GRIPPER_ORIENTATION_AGV
 )  # AGV空料盘位置
 SAFETY_HEIGHT = 0.32
 FEED_TABLE_BOX_FULL_OFFSET_X = 0.102
@@ -139,6 +139,7 @@ if __name__ == "__main__":
         queue_size=1,
     )
     pss_modbus_write(pss_modbus_write_dic["agv_ros_program_run"], [1])
+    pss_modbus_write(pss_modbus_write_dic["agv_at_robot_station"], [0])
 
     # 初始化
     r = Robot("1")  # 创建化机器人实例
@@ -172,11 +173,13 @@ if __name__ == "__main__":
     if current_pose.position.y > 0:
         r.move(Ptp(goal=CAPTURE_POSE, vel_scale=PTP_SCALE, acc_scale=0.1))
     r.move(Ptp(goal=HOME_POSE, vel_scale=PTP_SCALE, acc_scale=0.1))
+    pss_modbus_write(pss_modbus_write_dic["agv_prbt_at_home"], [1])
 
     while not rospy.is_shutdown():
         if box_missing:
             if 0 < box_plate_pick_number <= 5:
                 # 拍照并移动至满料盘位置
+                pss_modbus_write(pss_modbus_write_dic["agv_prbt_at_home"], [0])
                 r.move(Ptp(goal=CAPTURE_POSE, vel_scale=PTP_SCALE, acc_scale=0.2))
                 rospy.sleep(0.5)
                 get_marker_center()
@@ -234,8 +237,10 @@ if __name__ == "__main__":
                 )
                 r.move(Lin(goal=CAPTURE_POSE, vel_scale=LIN_SCALE, acc_scale=0.1))
                 r.move(Ptp(goal=HOME_POSE, vel_scale=PTP_SCALE, acc_scale=0.2))
+                pss_modbus_write(pss_modbus_write_dic["agv_prbt_at_home"], [1])
 
                 # 将满料盘放到小车
+                pss_modbus_write(pss_modbus_write_dic["agv_prbt_at_home"], [0])
                 r.move(
                     Lin(
                         goal=AGV_PLATE_FULL_POSE,
@@ -263,11 +268,17 @@ if __name__ == "__main__":
                     )
                 )
                 r.move(Ptp(goal=HOME_POSE, vel_scale=PTP_SCALE, acc_scale=0.2))
+                pss_modbus_write(pss_modbus_write_dic["agv_prbt_at_home"], [1])
 
                 # AGV去工作站位置
                 agv_task_id_deploy = agv_task_deply_wrapper(agv_task_id_deploy, 5)
+                pss_modbus_write(pss_modbus_write_dic["agv_at_robot_station"], [1])
 
                 # 机器人从工作站拾取空料盘
+                while not smfPrbt_at_home:
+                    r.pause()
+                r.resume()
+                pss_modbus_write(pss_modbus_write_dic["agv_prbt_at_home"], [0])
                 r.move(Ptp(goal=CAPTURE_POSE, vel_scale=PTP_SCALE, acc_scale=0.2))
                 rospy.sleep(0.5)
                 get_marker_center()
@@ -405,11 +416,18 @@ if __name__ == "__main__":
                 )
                 r.move(Lin(goal=CAPTURE_POSE, vel_scale=LIN_SCALE, acc_scale=0.1))
                 r.move(Ptp(goal=HOME_POSE, vel_scale=PTP_SCALE, acc_scale=0.2))
+                pss_modbus_write(pss_modbus_write_dic["agv_prbt_at_home"], [1])
 
                 # AGV去上料台位置
+                pss_modbus_write(pss_modbus_write_dic["agv_at_robot_station"], [0])
                 agv_task_id_deploy = agv_task_deply_wrapper(agv_task_id_deploy, 1)
 
+                while not (0 <= box_plate_place_number < 5):
+                    r.pause()
+
                 if 0 <= box_plate_place_number < 5:
+                    r.resume()
+                    pss_modbus_write(pss_modbus_write_dic["agv_prbt_at_home"], [0])
                     r.move(Ptp(goal=CAPTURE_POSE, vel_scale=PTP_SCALE, acc_scale=0.2))
                     rospy.sleep(0.5)
                     get_marker_center()
@@ -504,10 +522,12 @@ if __name__ == "__main__":
                     )
                     r.move(Lin(goal=CAPTURE_POSE, vel_scale=LIN_SCALE, acc_scale=0.1))
                     r.move(Ptp(goal=HOME_POSE, vel_scale=PTP_SCALE, acc_scale=0.2))
+                    pss_modbus_write(pss_modbus_write_dic["agv_prbt_at_home"], [1])
 
         if pen_missing:
             if 0 < pen_plate_pick_number <= 5:
                 # 拍照并移动至满料盘位置
+                pss_modbus_write(pss_modbus_write_dic["agv_prbt_at_home"], [0])
                 r.move(Ptp(goal=CAPTURE_POSE, vel_scale=PTP_SCALE, acc_scale=0.2))
                 rospy.sleep(0.5)
                 get_marker_center()
@@ -566,8 +586,10 @@ if __name__ == "__main__":
                 )
                 r.move(Lin(goal=CAPTURE_POSE, vel_scale=LIN_SCALE, acc_scale=0.1))
                 r.move(Ptp(goal=HOME_POSE, vel_scale=PTP_SCALE, acc_scale=0.2))
+                pss_modbus_write(pss_modbus_write_dic["agv_prbt_at_home"], [1])
 
                 # 将满料盘放到小车
+                pss_modbus_write(pss_modbus_write_dic["agv_prbt_at_home"], [0])
                 r.move(
                     Lin(
                         goal=AGV_PLATE_FULL_POSE,
@@ -595,11 +617,17 @@ if __name__ == "__main__":
                     )
                 )
                 r.move(Ptp(goal=HOME_POSE, vel_scale=PTP_SCALE, acc_scale=0.2))
+                pss_modbus_write(pss_modbus_write_dic["agv_prbt_at_home"], [1])
 
                 # AGV去工作站位置
                 agv_task_id_deploy = agv_task_deply_wrapper(agv_task_id_deploy, 5)
+                pss_modbus_write(pss_modbus_write_dic["agv_at_robot_station"], [1])
 
                 # 机器人从工作站拾取空料盘
+                while not smfPrbt_at_home:
+                    r.pause()
+                r.resume()
+                pss_modbus_write(pss_modbus_write_dic["agv_prbt_at_home"], [0])
                 r.move(Ptp(goal=CAPTURE_POSE, vel_scale=PTP_SCALE, acc_scale=0.2))
                 rospy.sleep(0.5)
                 get_marker_center()
@@ -737,11 +765,18 @@ if __name__ == "__main__":
                 )
                 r.move(Lin(goal=CAPTURE_POSE, vel_scale=LIN_SCALE, acc_scale=0.1))
                 r.move(Ptp(goal=HOME_POSE, vel_scale=PTP_SCALE, acc_scale=0.2))
+                pss_modbus_write(pss_modbus_write_dic["agv_prbt_at_home"], [1])
 
                 # AGV去上料台位置
+                pss_modbus_write(pss_modbus_write_dic["agv_at_robot_station"], [0])
                 agv_task_id_deploy = agv_task_deply_wrapper(agv_task_id_deploy, 1)
 
+                while not (0 <= pen_plate_place_number < 5):
+                    r.pause()
+
                 if 0 <= pen_plate_place_number < 5:
+                    r.resume()
+                    pss_modbus_write(pss_modbus_write_dic["agv_prbt_at_home"], [0])
                     r.move(Ptp(goal=CAPTURE_POSE, vel_scale=PTP_SCALE, acc_scale=0.2))
                     rospy.sleep(0.5)
                     get_marker_center()
@@ -836,5 +871,6 @@ if __name__ == "__main__":
                     )
                     r.move(Lin(goal=CAPTURE_POSE, vel_scale=LIN_SCALE, acc_scale=0.1))
                     r.move(Ptp(goal=HOME_POSE, vel_scale=PTP_SCALE, acc_scale=0.2))
+                    pss_modbus_write(pss_modbus_write_dic["agv_prbt_at_home"], [1])
 
     rospy.spin()
