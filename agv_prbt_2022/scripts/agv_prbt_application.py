@@ -31,21 +31,21 @@ CAPTURE_POSE = [
 GRIPPER_ORIENTATION = from_euler(0, math.radians(180), math.radians(180))  # 夹爪方向
 GRIPPER_ORIENTATION_AGV = from_euler(0, math.radians(180), math.radians(181))  # AGV夹爪方向
 AGV_PLATE_FULL_POSE = Pose(
-    position=Point(-0.128, -0.359, 0.138), orientation=GRIPPER_ORIENTATION_AGV
+    position=Point(-0.128, -0.357, 0.138), orientation=GRIPPER_ORIENTATION_AGV
 )  # AGV满料盘位置
 AGV_PLATE_EMPTY_POSE = Pose(
-    position=Point(0.118, -0.362, 0.138), orientation=GRIPPER_ORIENTATION_AGV
+    position=Point(0.117, -0.3605, 0.138), orientation=GRIPPER_ORIENTATION_AGV
 )  # AGV空料盘位置
 SAFETY_HEIGHT = 0.32
 FEED_TABLE_BOX_FULL_OFFSET_X = 0.102
-FEED_TABLE_BOX_EMPTY_OFFSET_X = 0.102 + 0.214
+FEED_TABLE_BOX_EMPTY_OFFSET_X = 0.102 + 0.215
 FEED_TABLE_PEN_FULL_OFFSET_X = 0.102 - 0.429
 FEED_TABLE_PEN_EMPTY_OFFSET_X = 0.102 - 0.214
-FEED_TABLE_OFFSET_Y = 0.12
-FEED_TABLE_PNP_OFFSET_Z = 0.071
+FEED_TABLE_OFFSET_Y = 0.121
+FEED_TABLE_PNP_OFFSET_Z = 0.073
 SMF_TABLE_BOX_OFFSET_X = 0.264
 SMF_TABLE_PEN_OFFSET_X = 0.264 - 0.27
-SMF_TABLE_OFFSET_Y = 0.149
+SMF_TABLE_OFFSET_Y = 0.1515
 CAMERA_GRIPPER_OFFSET = 0.066
 PLATE_HEIGHT = 0.025
 
@@ -222,7 +222,7 @@ if __name__ == "__main__":
                         acc_scale=0.1,
                     )
                 )
-                r.move(Gripper(goal=0.029))
+                r.move(Gripper(goal=0.022))
                 rospy.sleep(0.5)
                 r.move(
                     Lin(
@@ -298,7 +298,7 @@ if __name__ == "__main__":
                     )
                 )
                 pick_start_pose = r.get_current_pose()
-                pick_height = 0.04
+                pick_height = 0.041
                 r.move(Gripper(goal=0.029))
                 r.move(
                     Lin(
@@ -308,7 +308,7 @@ if __name__ == "__main__":
                         acc_scale=0.1,
                     )
                 )
-                r.move(Gripper(goal=0.029))
+                r.move(Gripper(goal=0.022))
                 rospy.sleep(0.5)
                 r.move(
                     Lin(
@@ -366,7 +366,7 @@ if __name__ == "__main__":
                         acc_scale=0.1,
                     )
                 )
-                r.move(Gripper(goal=0.029))
+                r.move(Gripper(goal=0.022))
                 rospy.sleep(0.5)
                 r.move(
                     Lin(
@@ -467,7 +467,7 @@ if __name__ == "__main__":
                                 feedTable_y
                                 + FEED_TABLE_OFFSET_Y
                                 + CAMERA_GRIPPER_OFFSET
-                                + 0.003,
+                                + 0.002,
                                 0.3,
                             )
                         ),
