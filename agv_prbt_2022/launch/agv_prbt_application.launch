@@ -8,6 +8,6 @@
     <node ns="pylon_camera_node" name="image_rectify" pkg="image_proc" type="image_proc" />
     <node name="image_processing" pkg="agv_prbt_2022" type="image_processing_node.py" />
 
-    <!-- <node name="agv_prbt_application" pkg="agv_prbt_2022" type="agv_prbt_application.py" output="screen" /> -->
+    <node name="agv_prbt_application" pkg="agv_prbt_2022" type="agv_prbt_application.py" output="screen" />
     
 </launch>

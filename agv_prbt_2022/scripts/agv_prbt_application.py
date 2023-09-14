@@ -103,11 +103,10 @@ def pss_modbus_read_callback(data):
     box_missing = data.holding_registers.data[26]
     pen_missing = data.holding_registers.data[27]
 
-    # if not robot_run_permission or external_stop:
-    if external_stop:
+    if not robot_run_permission or external_stop:
         r.pause()
 
-    if external_start:
+    if robot_run_permission and external_start:
         rospy.sleep(1)
         r.resume()
 
@@ -132,17 +131,20 @@ def get_marker_center():
 if __name__ == "__main__":
     rospy.init_node("agv_prbt_application")
     rospy.loginfo("AGV PRBT application started")
+
+    # 初始化
+    r = Robot("1")  # 创建化机器人实例
+
     rospy.Subscriber(
         "/pilz_modbus_client_node/modbus_read",
         ModbusMsgInStamped,
         pss_modbus_read_callback,
         queue_size=1,
     )
+    pss_modbus_write(pss_modbus_write_dic["agv_ros_program_run"], [0])
+    rospy.sleep(1)
     pss_modbus_write(pss_modbus_write_dic["agv_ros_program_run"], [1])
     pss_modbus_write(pss_modbus_write_dic["agv_at_robot_station"], [0])
-
-    # 初始化
-    r = Robot("1")  # 创建化机器人实例
 
     agv_task_id_deploy = random.randint(1, 100)
     agv_task_id_lookup = agv_task_id_deploy
